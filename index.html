@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Яша выбирает профессию · Приключения с папильоном Яшей</title>
+<style>
+  :root{
+    --beige1:#FBF4E4; --beige2:#F0E2C4; --green:#2E7D32; --green2:#388E3C;
+    --ink:#33502F; --line:#D9CDA9; --white:#fff;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif; color:var(--ink);
+    background:linear-gradient(180deg,var(--beige1),var(--beige2));
+    min-height:100vh; overflow-x:hidden; transition:background .5s ease;
+  }
+  /* фон меняется по этапам — визуальный маркер прогресса (чек-лист) */
+  body.bg2{background:linear-gradient(180deg,#FDF7EA,#F3E7CB)}
+  body.bg3{background:linear-gradient(180deg,#F7F4E7,#E9EFDA)}
+  body.bg4{background:linear-gradient(180deg,#F4F8EC,#E4EFD8)}
+  body.bg5{background:linear-gradient(180deg,#FFF8E7,#FCE9C6)}
+
+  .screen{display:none; min-height:100vh; padding:12px 14px 22px; flex-direction:column; align-items:center; justify-content:flex-start; gap:10px}
+  .screen.on{display:flex}
+  /* контент по центру экрана и НЕ обрезается сверху при высоком контенте */
+  .wrap{margin:auto 0; display:flex; flex-direction:column; align-items:center; gap:10px; width:100%}
+
+  h1{font-size:clamp(26px,5vw,48px); color:var(--green2); text-align:center; margin:4px 0 2px; text-shadow:1px 1px 0 #fff; line-height:1.12}
+  h2{font-size:clamp(20px,3.6vw,32px); color:var(--green); text-align:center; margin:2px 0 0; line-height:1.2}
+  .sub{font-size:clamp(13px,2vw,17px); color:#5c6b4f; text-align:center; margin:0}
+
+  .logo{height:clamp(88px,13vw,150px)}
+  .hero{width:min(660px,86vw); border-radius:20px; box-shadow:0 10px 26px rgba(90,80,40,.18); background:#fff}
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    font-size:clamp(16px,2.6vw,23px); font-weight:700; padding:14px 26px; min-height:56px;
+    border-radius:999px; cursor:pointer; background:var(--white); color:var(--green);
+    border:4px solid var(--green); box-shadow:0 5px 0 #A5D6A7;
+    transition:transform .08s ease, box-shadow .08s ease; user-select:none; text-align:center}
+  .btn:active{transform:translateY(3px); box-shadow:0 2px 0 #A5D6A7}
+  .btn.small{font-size:clamp(14px,2.1vw,18px); padding:11px 20px; min-height:48px; border-width:3px}
+  .btn.ghost{border-color:#B9C7A8; color:#5c6b4f; box-shadow:0 5px 0 #DCE3CE}
+  .row{display:flex; flex-wrap:wrap; gap:12px; justify-content:center}
+
+  .prog{width:min(940px,100%); display:flex; align-items:center; gap:10px; font-weight:700; color:#6b7a5a; font-size:clamp(12px,1.9vw,15px)}
+  .bar{flex:1; height:10px; background:#E6DCC2; border-radius:99px; overflow:hidden}
+  .bar i{display:block; height:100%; width:0%; background:var(--green); border-radius:99px; transition:width .35s ease}
+
+  .bigline{font-size:clamp(24px,4.6vw,46px); font-weight:800; color:var(--green); text-align:center;
+           line-height:1.25; text-shadow:1px 1px 0 #fff; padding:6px 10px}
+
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:100%; max-width:940px; justify-items:center}
+  .pick{background:#fff; border:4px solid #E4DCC6; border-radius:20px; padding:10px; cursor:pointer;
+        display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+        transition:transform .1s, border-color .15s; min-height:110px; width:100%}
+  .pick img{width:100%; height:clamp(80px,14vw,138px); object-fit:contain}
+  .pick .cap{font-size:clamp(13px,2vw,18px); font-weight:700; color:var(--green)}
+  /* круглая аватарка Баловашки — он говорит */
+  .round{width:clamp(76px,12vw,124px); height:clamp(76px,12vw,124px); border-radius:50%;
+         object-fit:cover; object-position:center 22%; border:4px solid #A5D6A7; background:#fff;
+         box-shadow:0 4px 12px rgba(90,80,40,.15); flex:0 0 auto}
+  .pick:hover{border-color:#C7D6B4}
+  .pick.ok{border-color:var(--green); box-shadow:0 0 0 5px rgba(46,125,50,.15)}
+  .pick.no{border-color:#E57373; opacity:.6}
+  .pick.plain{cursor:default; border:none; background:transparent}
+
+  /* КРУПНЫЕ картинки профессий */
+  .proffig{height:clamp(150px,27vw,300px); object-fit:contain}
+  .proffig.big{height:clamp(180px,33vw,360px)}
+  .proffig.mid{height:clamp(120px,20vw,220px)}
+  /* инструменты/предметы — ровно по центру, симметрично */
+  .memgrid{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px; width:100%; max-width:940px}
+  .memfig{width:clamp(84px,14vw,124px); height:clamp(74px,12vw,108px); object-fit:contain; background:#fff; border-radius:14px; padding:6px}
+
+  .star{font-size:clamp(30px,6vw,54px)}
+  .proverb{font-size:clamp(20px,3.6vw,34px); color:var(--green); font-weight:800; text-align:center; line-height:1.25}
+  video{width:min(880px,100%); border-radius:18px; background:#000; box-shadow:0 8px 22px rgba(0,0,0,.18)}
+  /* итоговое видео — меньше, чтобы пословица поместилась на экране сразу */
+  #vidProverb{width:min(520px,58%); max-height:38vh}
+  .bubble{position:relative; background:#fff; border:3px solid #E4DCC6; border-radius:18px; padding:12px 16px;
+          font-size:clamp(16px,2.6vw,24px); max-width:min(760px,92%); text-align:center}
+  .hintbox{background:#FFFDF5; border:2px dashed #CBBE96; border-radius:16px; padding:10px 14px;
+           font-size:clamp(13px,2vw,18px); color:#6b5f3f; text-align:center; max-width:min(760px,92%)}
+  .timer{width:min(760px,92%); height:12px; background:#E6DCC2; border-radius:99px; overflow:hidden}
+  .timer i{display:block; height:100%; width:100%; background:#F0A62E; border-radius:99px}
+  .shake{animation:sh .4s}
+  @keyframes sh{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pop{animation:pp .45s}
+  @keyframes pp{0%{transform:scale(.85)}60%{transform:scale(1.06)}100%{transform:scale(1)}}
+  .hidden{display:none !important}
+  /* фоновые картинки на заданиях УБРАНЫ — отвлекали (решение Наташи) */
+  @media (max-width:620px){ .btn{padding:13px 18px} .grid3{gap:8px} }
+</style>
+</head>
+<body>
+
+<!-- Э0 · СТАРТ -->
+<section class="screen on mid" id="sStart">
+  <img class="logo" src="images/logo.png" alt="Яша">
+  <img class="hero pop" src="images/zastavka_troe.jpg" alt="все трое">
+  <h1>Яша выбирает профессию</h1>
+  <p class="sub">5 профессий · 5–6 лет · 10–12 минут</p>
+  <div class="btn" id="btnStart">▶ Играть!</div>
+</section>
+
+<!-- Э1 · ПРИВЕТСТВИЕ -->
+<section class="screen mid" id="sHello">
+  <div class="prog"><span>Этап 1 из 4</span><span class="bar"><i id="p1"></i></span></div>
+  <h2>Познакомимся?</h2>
+  <img class="hero" src="images/zastavka_troe.jpg" alt="все трое">
+  <p class="sub">Яша · Наташа · Баловашка</p>
+</section>
+
+<!-- Э2 · ЗАГАДКА (сразу видео) -->
+<section class="screen mid" id="sRiddle">
+  <video id="vidRiddle" playsinline preload="auto" src="video/01_zagadka.mp4"></video>
+  <div id="riddleFallback" class="row hidden"><div class="btn" id="btnVideo">▶ Смотреть загадку</div></div>
+  <div id="riddleChoices" class="hidden" style="width:100%; max-width:940px; display:flex; flex-direction:column; align-items:center; gap:10px">
+    <p class="sub">Кто это? Нажми на картинку</p>
+    <div class="grid3" id="riddleGrid"></div>
+    <div class="row hidden" id="riddleNextRow"><div class="btn" id="btnRiddleNext">Дальше ➡</div></div>
+  </div>
+</section>
+
+<!-- Э3 · СКОРОГОВОРКА (картинка ПОВАРА) -->
+<section class="screen mid" id="sTongue">
+  <div class="prog"><span>Этап 1 из 4 · Разминка</span><span class="bar"><i id="p3"></i></span></div>
+  <div class="bigline">Пекарь пёк калачи в печи</div>
+  <img src="images/povar.jpg" class="proffig big" alt="повар">
+  <div class="row">
+    <div class="btn ghost small" id="btnTongueAgain">🔊 Послушать ещё</div>
+    <div class="btn small" id="btnTongueNext">Дальше ➡</div>
+  </div>
+</section>
+
+<!-- Э4 · ЭТАП 2 «Кому что нужно?» -->
+<section class="screen mid" id="sQuiz">
+  <div class="prog"><span id="quizProg">Задание 1 из 5</span><span class="bar"><i id="p4"></i></span></div>
+  <h2 id="quizTitle">Кому что нужно?</h2>
+  <img class="proffig" id="quizProf" src="images/vrach.jpg" alt="">
+  <div class="grid3" id="quizGrid"></div>
+  <div class="hintbox hidden" id="quizHint"></div>
+  <div class="row hidden" id="quizNextRow"><div class="btn" id="btnQuizNext">Дальше ➡</div></div>
+  <div class="row hidden" id="quizSkipRow"><div class="btn ghost small" id="btnQuizSkip">Продолжить ➡</div></div>
+</section>
+
+<!-- Э5 · ЭТАП 3 «Найди ошибку Баловашки» (без картинки Баловашки) -->
+<section class="screen mid" id="sSay">
+  <div class="prog"><span id="sayProg">Задание 1 из 4</span><span class="bar"><i id="p5"></i></span></div>
+  <h2>Найди ошибку Баловашки</h2>
+  <div style="display:flex; align-items:center; gap:12px; justify-content:center; flex-wrap:wrap; max-width:940px">
+    <img src="images/balovashka_kaska.jpg" class="round" alt="Баловашка">
+    <div class="bubble" id="sayBubble">…</div>
+  </div>
+  <img id="sayImg" src="images/pozharny.jpg" class="proffig big" alt="">
+  <div class="row" id="sayButtons">
+    <div class="btn small" data-ans="1">Верно ✓</div>
+    <div class="btn ghost small" data-ans="0">Неверно ✗</div>
+  </div>
+  <div class="row hidden" id="sayNextRow"><div class="btn" id="btnSayNext">Дальше ➡</div></div>
+</section>
+
+<!-- Э6 · ЭТАП 4 «Инструменты потерялись» (быстрый вход) -->
+<section class="screen mid" id="sMemory">
+  <div class="prog"><span id="memProg">Задание 1 из 3</span><span class="bar"><i id="p6"></i></span></div>
+  <h2>Инструменты потерялись</h2>
+  <p class="sub" id="memSub">Запоминай!</p>
+  <div class="timer"><i id="memTimer"></i></div>
+  <div class="memgrid" id="memGrid"></div>
+  <div id="memAsk" class="hidden" style="width:100%; max-width:940px; display:flex; flex-direction:column; align-items:center; gap:10px">
+    <p class="sub" id="memAskText">Чего не стало?</p>
+    <div class="grid3" id="memChoices"></div>
+  </div>
+  <div class="hintbox hidden" id="memHint"></div>
+  <div class="row hidden" id="memNextRow"><div class="btn" id="btnMemNext">Дальше ➡</div></div>
+</section>
+
+<!-- Э7 · ФИНАЛ -->
+<section class="screen mid" id="sFinal">
+  <div class="prog"><span>Готово!</span><span class="bar"><i id="p7"></i></span></div>
+  <div class="star" id="finalStars">⭐⭐⭐⭐⭐</div>
+  <h1>Яша гордится тобой!</h1>
+  <video id="vidProverb" playsinline preload="auto" src="video/03_poslovie.mp4"></video>
+  <div id="proverbFallback" class="row hidden"><div class="btn" id="btnProverb">▶ Посмотреть пословицу</div></div>
+  <div class="proverb hidden" id="proverbText">Любой труд почтён, любой мастер нужен</div>
+  <div class="row hidden" id="finalAgainRow"><div class="btn" id="btnAgain">🔁 Сыграть ещё раз</div></div>
+</section>
+
+<audio id="voice" preload="auto"></audio>
+
+<script>
+(function(){
+  "use strict";
+  var S = { voice: document.getElementById('voice') };
+
+  /* оборачиваем содержимое экранов — центрирование без обрезки */
+  (function(){
+    var screens = document.querySelectorAll('.screen');
+    for (var i=0;i<screens.length;i++){
+      var s = screens[i], w = document.createElement('div');
+      w.className = 'wrap';
+      while (s.firstChild) w.appendChild(s.firstChild);
+      s.appendChild(w);
+    }
+  })();
+
+  /* ───── похвалы и подсказки (мешочек — без повторов) ───── */
+  var PRAISE = ['pohvala/p01','pohvala/p02','pohvala/p03','pohvala/p04','pohvala/p05','pohvala/p06','pohvala/p07','pohvala/p08','pohvala/p09','pohvala/p10',
+    'pohvala/молодец_1','pohvala/молодец_2','pohvala/молодец_3','pohvala/точно_1','pohvala/точно_2','pohvala/умница_1','pohvala/умница_2','pohvala/гениально','pohvala/верно','pohvala/правильно'];
+  var AGAIN  = ['podymai/e01','podymai/e02','podymai/e03','podymai/e04','podymai/e05','podymai/e06','podymai/e07','podymai/e08',
+    'podymai/почти_1','podymai/почти_2','podymai/почти_3','podymai/не_точно_1','podymai/не_точно_2','podymai/попробуй_еще_1'];
+
+  function bag(list){
+    var pool = list.slice(), last = null;
+    return function(){
+      if (Math.random() < .25) pool.sort(function(){ return Math.random() - .5; });
+      if (!pool.length){ pool = list.slice(); if (pool.length > 1 && pool[0] === last) pool.push(pool.shift()); }
+      var v = pool.shift();
+      if (v === last && pool.length){ var t = pool[0]; pool[0] = v; v = t; }
+      last = v; return v;
+    };
+  }
+  var nextPraise = bag(PRAISE), nextAgain = bag(AGAIN);
+  var QUESTIONS = ['q01','q02','q03'];          /* три варианта «чего не стало» — без повторов */
+  var nextQuestion = bag(QUESTIONS);
+
+  function show(id, bg){
+    var list = document.querySelectorAll('.screen');
+    for (var i=0;i<list.length;i++) list[i].classList.remove('on');
+    document.getElementById(id).classList.add('on');
+    document.body.className = bg ? ('bg' + bg) : '';
+    window.scrollTo(0,0);
+  }
+  function say(file, after){
+    try{
+      S.voice.pause(); S.voice.currentTime = 0; S.voice.onended = null;
+      S.voice.src = (file.indexOf('/') >= 0 ? file : 'sounds/' + file) + '.mp3';
+      S.voice.onended = function(){ if (after) after(); };
+      var p = S.voice.play();
+      if (p && p.catch) p.catch(function(){ setTimeout(function(){ if (after) after(); }, 300); });
+    } catch(e){ if (after) after(); }
+  }
+  function stopVoice(){ try{ S.voice.pause(); S.voice.currentTime = 0; S.voice.onended = null; }catch(e){} }
+  function praise(after){ say(nextPraise(), after); }
+  function oops(after){ say(nextAgain(), after); }
+  function progress(el, pct){ el.style.width = Math.max(4, Math.min(100, Math.round(pct))) + '%'; }
+
+  function playVideo(v, onEnd, fallbackEl, btnEl){
+    try{ v.currentTime = 0; }catch(e){}
+    v.onended = function(){ if (onEnd) onEnd(); };
+    var p = v.play();
+    if (p && p.catch) p.catch(function(){
+      if (fallbackEl){ fallbackEl.classList.remove('hidden'); v.classList.add('hidden');
+        if (btnEl) btnEl.onclick = function(){ fallbackEl.classList.add('hidden'); v.classList.remove('hidden'); v.play(); }; }
+    });
+  }
+  function preloadVideo(id){
+    try{ var v = document.getElementById(id); if (v && v.load) v.load(); }catch(e){}
+  }
+
+  /* ───── Э0 → Э1 ───── */
+  document.getElementById('btnStart').addEventListener('click', function(){
+    show('sHello', 1); progress(document.getElementById('p1'), 12);
+    setTimeout(function(){ say('pro01', function(){ setTimeout(startRiddle, 400); }); }, 250);
+  });
+
+  /* ───── Э2 загадка ───── */
+  var PROFS = [{img:'vrach.jpg',key:'vrach',cap:'врач'},{img:'povar.jpg',key:'povar',cap:'повар'},{img:'stroitel.jpg',key:'stroitel',cap:'строитель'}];
+  var riddleReady = false;
+  function startRiddle(){
+    stopVoice(); show('sRiddle', 2);
+    playVideo(document.getElementById('vidRiddle'), function(){
+      /* видео закончилось — убираем чёрный прямоугольник и сразу показываем варианты */
+      var v = document.getElementById('vidRiddle');
+      v.classList.add('hidden');
+      showRiddleChoices();
+    }, document.getElementById('riddleFallback'), document.getElementById('btnVideo'));
+  }
+  function showRiddleChoices(){
+    if (riddleReady) return;
+    riddleReady = true;
+    var grid = document.getElementById('riddleGrid'); grid.innerHTML = '';
+    PROFS.forEach(function(p){
+      var d = document.createElement('div');
+      d.className = 'pick';
+      d.innerHTML = '<img src="images/' + p.img + '" alt=""><span class="cap">' + p.cap + '</span>';
+      d.addEventListener('click', function(){
+        if (p.key === 'vrach'){
+          d.classList.add('ok');
+          var all = document.querySelectorAll('#riddleGrid .pick');
+          for (var i=0;i<all.length;i++) all[i].style.pointerEvents = 'none';
+          praise(function(){ document.getElementById('riddleNextRow').classList.remove('hidden'); });
+        } else { d.classList.add('no','shake'); stopVoice(); oops(); }
+      });
+      grid.appendChild(d);
+    });
+    document.getElementById('riddleChoices').classList.remove('hidden');
+  }
+  document.getElementById('btnRiddleNext').addEventListener('click', function(){
+    stopVoice(); show('sTongue', 2); progress(document.getElementById('p3'), 38); say('pro04');
+  });
+
+  /* ───── Э3 скороговорка ───── */
+  document.getElementById('btnTongueAgain').addEventListener('click', function(){ say('pro04'); });
+  document.getElementById('btnTongueNext').addEventListener('click', function(){
+    stopVoice(); show('sQuiz', 3); progress(document.getElementById('p4'), 45);
+    say('pro05', function(){ setTimeout(quizRound, 400); });
+  });
+
+  /* ───── Э4 этап 2 ───── */
+  var QUIZ = [
+    {prof:'vrach',    say:'pro06', ans:'pred_gradusnik', opts:['pred_gradusnik','pred_polovnik','pred_kirpich'],
+     hint:'Врач слушает больного. Что у него в руке?'},
+    {prof:'povar',    say:'pro08', ans:'pred_polovnik',  opts:['pred_polovnik','pred_gradusnik','pred_ukazka'],
+     hint:'Повар готовит суп. Чем он наливает?'},
+    {prof:'stroitel', say:'pro09', ans:'pred_molotok',   opts:['pred_molotok','pred_shlang','pred_kniga'],
+     hint:'Строитель забивает гвозди. Что ему нужно?'},
+    {prof:'pozharny', say:'pro10', ans:'pred_shlang',    opts:['pred_shlang','pred_polovnik','pred_lozhka'],
+     hint:'Пожарный тушит огонь. Что ему нужно?'},
+    {prof:'uchitel',  say:'pro11', ans:'pred_ukazka',    opts:['pred_ukazka','pred_masterok','pred_kirpich'],
+     hint:'Учитель показывает на доске. Что у него в руке?'}
+  ];
+  var qi = 0, quizMiss = 0;
+  function quizRound(){
+    var q = QUIZ[qi]; quizMiss = 0;
+    document.getElementById('quizProg').textContent = 'Задание ' + (qi+1) + ' из ' + QUIZ.length;
+    progress(document.getElementById('p4'), 45 + (qi / QUIZ.length) * 20);
+    document.getElementById('quizProf').src = 'images/' + q.prof + '.jpg';
+    document.getElementById('quizHint').classList.add('hidden');
+    document.getElementById('quizNextRow').classList.add('hidden');
+    document.getElementById('quizSkipRow').classList.add('hidden');
+    var grid = document.getElementById('quizGrid'); grid.innerHTML = '';
+    q.opts.forEach(function(name){
+      var d = document.createElement('div');
+      d.className = 'pick';
+      d.innerHTML = '<img src="images/' + name + '.jpg" alt="">';
+      d.addEventListener('click', function(){
+        if (d.dataset.locked === '1') return;
+        if (name === q.ans){
+          d.classList.add('ok','pop'); lockQuiz();
+          praise(function(){ document.getElementById('quizNextRow').classList.remove('hidden'); });
+        } else {
+          d.classList.add('no','shake'); stopVoice(); oops(); quizMiss++;
+          var hb = document.getElementById('quizHint');
+          hb.textContent = '💡 ' + q.hint; hb.classList.remove('hidden');
+          if (quizMiss >= 3) document.getElementById('quizSkipRow').classList.remove('hidden');
+        }
+      });
+      grid.appendChild(d);
+    });
+    say(q.say);
+  }
+  function lockQuiz(){
+    var picks = document.querySelectorAll('#quizGrid .pick');
+    for (var i=0;i<picks.length;i++) picks[i].dataset.locked = '1';
+  }
+  document.getElementById('btnQuizNext').addEventListener('click', function(){
+    stopVoice(); qi++;
+    if (qi < QUIZ.length){ quizRound(); }
+    else { show('sSay', 3); progress(document.getElementById('p5'), 68); say('pro12', function(){ setTimeout(sayRound, 400); }); }
+  });
+  document.getElementById('btnQuizSkip').addEventListener('click', function(){
+    stopVoice(); qi++;
+    if (qi < QUIZ.length){ quizRound(); }
+    else { show('sSay', 3); progress(document.getElementById('p5'), 68); say('pro12', function(){ setTimeout(sayRound, 400); }); }
+  });
+
+  /* ───── Э5 этап 3 (только реплика + крупная картинка профессии) ───── */
+  var SAYS = [
+    {say:'pro13', correct:false, expl:'pro14', img:'pozharny.jpg',  text:'«Пожарный поливает цветочки!»'},
+    {say:'pro15', correct:true,  expl:'pro16', img:'povar.jpg',     text:'«Повар варит вкусный суп!»'},
+    {say:'pro17', correct:false, expl:'pro18', img:'uchitel.jpg',   text:'«Учитель водит автобус!»'},
+    {say:'pro19', correct:true,  expl:'pro20', img:'stroitel.jpg',  text:'«Строитель строит дом!»'}
+  ];
+  var si = 0, sayAnswered = false;
+  function sayRound(){
+    var s = SAYS[si]; sayAnswered = false;
+    document.getElementById('sayProg').textContent = 'Задание ' + (si+1) + ' из ' + SAYS.length;
+    progress(document.getElementById('p5'), 68 + (si / SAYS.length) * 14);
+    document.getElementById('sayBubble').textContent = s.text;
+    document.getElementById('sayImg').src = 'images/' + s.img;
+    document.getElementById('sayButtons').classList.remove('hidden');
+    document.getElementById('sayNextRow').classList.add('hidden');
+    setTimeout(function(){ say(s.say); }, 250);
+  }
+  document.getElementById('sayButtons').addEventListener('click', function(e){
+    var b = e.target.closest('[data-ans]'); if (!b || sayAnswered) return;
+    sayAnswered = true;
+    var s = SAYS[si], userSaidTrue = b.dataset.ans === '1';
+    document.getElementById('sayButtons').classList.add('hidden');
+    document.getElementById('sayNextRow').classList.remove('hidden');
+    stopVoice();
+    if (userSaidTrue === s.correct){ say(s.expl); }                             /* одно объяснение — без наложения */
+    else { oops(function(){ setTimeout(function(){ say(s.expl); }, 200); }); }  /* сначала «попробуй ещё», потом объяснение */
+  });
+  document.getElementById('btnSayNext').addEventListener('click', function(){
+    stopVoice(); si++;
+    if (si < SAYS.length){ sayRound(); }
+    else { show('sMemory', 4); progress(document.getElementById('p6'), 82); startMemory(); }   /* быстрый вход! */
+  });
+
+  /* ───── Э6 этап 4 ───── */
+  var ALL = ['inst_klyuch','inst_otvertka','pred_molotok','inst_pila','inst_lineyka','inst_rubanok'];
+  var ROUNDS = [
+    {items:['inst_klyuch','inst_otvertka','pred_molotok','inst_pila','inst_lineyka']},
+    {items:['inst_klyuch','inst_otvertka','pred_molotok','inst_pila','inst_lineyka','inst_rubanok']},
+    {items:['inst_otvertka','pred_molotok','inst_pila','inst_lineyka','inst_rubanok','inst_klyuch']}
+  ];
+  var ri = 0, memAskShown = false, memMiss = 0;
+
+  function startMemory(){ ri = 0; memRound(); }
+
+  function memRound(){
+    memAskShown = false; memMiss = 0;
+    var r = ROUNDS[ri];
+    document.getElementById('memProg').textContent = 'Задание ' + (ri+1) + ' из ' + ROUNDS.length;
+    progress(document.getElementById('p6'), 82 + (ri / ROUNDS.length) * 12);
+    document.getElementById('memAsk').classList.add('hidden');
+    document.getElementById('memHint').classList.add('hidden');
+    document.getElementById('memNextRow').classList.add('hidden');
+    document.getElementById('memSub').textContent = 'Запоминай!';
+    var grid = document.getElementById('memGrid'); grid.innerHTML = '';
+    r.items.forEach(function(n){
+      var im = document.createElement('img');
+      im.className = 'memfig'; im.src = 'images/' + n + '.jpg'; im.alt = '';
+      grid.appendChild(im);
+    });
+    var bar = document.getElementById('memTimer');
+    bar.style.transition = 'none'; bar.style.width = '100%';
+    /* фраза «Посмотри внимательно…» ДОИГРЫВАЕТ, потом идёт 5 секунд на запоминание */
+    say('pro22', function(){
+      setTimeout(function(){ bar.style.transition = 'width 5s linear'; bar.style.width = '0%'; }, 60);
+      setTimeout(function(){ memHide(grid, r); }, 5300);
+    });
+  }
+  function memHide(grid, r){
+    if (memAskShown) return;
+    memAskShown = true;
+    var goneIdx = Math.floor(Math.random() * r.items.length);
+    var gone = r.items[goneIdx];
+    var fig = grid.children[goneIdx];
+    if (fig) fig.style.visibility = 'hidden';
+    document.getElementById('memSub').textContent = '';
+    document.getElementById('memAskText').textContent = 'Чего не стало?';
+    var others = ALL.filter(function(x){ return x !== gone; }).sort(function(){ return Math.random() - .5; }).slice(0,2);
+    var opts = [gone].concat(others).sort(function(){ return Math.random() - .5; });
+    var box = document.getElementById('memChoices'); box.innerHTML = '';
+    opts.forEach(function(n){
+      var d = document.createElement('div');
+      d.className = 'pick';
+      d.innerHTML = '<img src="images/' + n + '.jpg" alt="">';
+      d.addEventListener('click', function(){
+        if (n === gone){
+          d.classList.add('ok','pop');
+          var all = document.querySelectorAll('#memChoices .pick');
+          for (var i=0;i<all.length;i++) all[i].style.pointerEvents = 'none';
+          praise(function(){ document.getElementById('memNextRow').classList.remove('hidden'); });
+        } else {
+          d.classList.add('no','shake'); stopVoice(); oops(); memMiss++;
+          var hb = document.getElementById('memHint');
+          hb.textContent = '💡 Посмотри ещё раз, чего не хватает на верстаке';
+          hb.classList.remove('hidden');
+        }
+      });
+      box.appendChild(d);
+    });
+    document.getElementById('memAsk').classList.remove('hidden');
+    say(nextQuestion());                 /* «Посмотри внимательно / хорошенько / укажи…» — без повторов */
+  }
+  document.getElementById('btnMemNext').addEventListener('click', function(){
+    stopVoice(); ri++;
+    if (ri < ROUNDS.length){ memRound(); } else { finish(); }
+  });
+
+  /* ───── Э7 финал ───── */
+  function finish(){
+    stopVoice(); show('sFinal', 5); progress(document.getElementById('p7'), 100);
+    document.getElementById('proverbText').classList.remove('hidden');   /* пословица видна сразу */
+    say('pro25', function(){
+      setTimeout(function(){
+        playVideo(document.getElementById('vidProverb'), function(){
+          document.getElementById('finalAgainRow').classList.remove('hidden');
+          say('pro27');
+        }, document.getElementById('proverbFallback'), document.getElementById('btnProverb'));
+      }, 400);
+    });
+  }
+  document.getElementById('btnAgain').addEventListener('click', function(){
+    stopVoice();
+    say('pro28', function(){ location.reload(); });    /* «Хочешь сыграть ещё раз?» */
+  });
+
+  /* предзагрузка видео фоном (чек-лист) */
+  preloadVideo('vidRiddle'); preloadVideo('vidProverb');
+})();
+</script>
+</body>
+</html>
